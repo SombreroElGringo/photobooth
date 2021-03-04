@@ -23,7 +23,8 @@ You just need to create a new `page` and use the following `shortcode`:
 [photobooth type="top" default_overlay="overlay_top.png"]
 ```
 
-If needed you can use `multiple times` the `shortcode` on your page a `unique id` is generated for each shortcode.
+If needed you can use `multiple times` the `shortcode` on your page.
+A `unique id` is generated for each shortcode.
 
 ```
 [photobooth type="top" default_overlay="overlay_top.png"]
