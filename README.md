@@ -38,7 +38,8 @@ If needed you can use `multiple times` the `shortcode` on your page a `unique id
 | Parameter | Description |
 |---|---|
 | type | Should be unique this `value` will be use to select the last photo uploaded in the database to be use as new overlay for this `type` |
-| default_overlay | Should be the `path` to a `image` to use as default `overlay` |
+| default_overlay | Should be the `path` to a `image` to use as default `overlay`. The `size` of the `image` for the `overlay` must be `320 pixels width × 390 pixels height` |
+
 
 ## Where the image is uploaded?
 

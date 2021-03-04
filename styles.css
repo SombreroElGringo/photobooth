@@ -1,0 +1,70 @@
+.photobooth {
+  width: fit-content;
+  text-align: center;
+}
+
+.photobooth__camera {
+  display: block;
+  width: min-content;
+  position: relative;
+}
+
+.photobooth__output {
+  background-color: #808080;
+  position: absolute;
+  top: 0;
+}
+
+.photobooth__output--hidden {
+  display: none;
+}
+
+.photobooth__output--display {
+  display: block;
+}
+
+.photobooth__video {
+  height: 390px;
+  width: 320px;
+  object-fit: fill;
+}
+
+.photobooth__overlay {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  top: -5px;
+  right: 0;
+  filter: opacity(40%);
+}
+
+.photobooth__info {
+  width: 320px;
+}
+
+.photobooth__buttons {
+  width: 100%;
+}
+
+.photobooth__button {
+  max-width: 150px;
+  padding: 6px 10px;
+  border: 1px solid #000;
+  text-align: center;
+  color: #000;
+  background-color: #fff;
+  font-weight: 500;
+}
+
+.photobooth__button:hover {
+  color: #fff;
+  background-color: #000;
+  border: 1px solid #000;
+}
+
+.photobooth__button:disabled {
+  color: #000;
+  background-color: #dddddd;;
+  border: 1px solid #000;
+}
