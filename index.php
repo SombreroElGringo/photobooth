@@ -40,7 +40,9 @@ function generate_html($uuid, $type, $overlay) {
       <div class='photobooth__camera'>
         <video
           id='{$uuid}_camera'
-          class='photobooth__video'>
+          class='photobooth__video'
+          muted autoplay playsinline
+          >
           Video stream not available
         </video>
         <img
@@ -58,6 +60,7 @@ function generate_html($uuid, $type, $overlay) {
         <button id='{$uuid}_save' class='photobooth__button'>Save</button>
       </div>
     </div>
+    <script src='https://webrtc.github.io/adapter/adapter-latest.js'></script>
     <script type='text/javascript'>
       photobooth.initialize('{$uuid}', '{$type}');
     </script>
@@ -77,11 +80,12 @@ function save_photobooth() {
 function upload_photo($type, $photo) {
   $wp_upload_dir = wp_upload_dir();
   $user_id = get_current_user_id();
-  $date = new DateTime();
+  $today = date('Y-m-d_H:i:s');
+  $project = 'photobooth';
 
-  $upload_folder = "{$wp_upload_dir['basedir']}/{$SHORTCODE}/{$user_id}/{$type}";
-  $filename = "${user_id}_{$type}_{$date->getTimestamp()}.png";
-  $url = parse_url("{$wp_upload_dir['baseurl']}/{$SHORTCODE}/{$user_id}/{$type}/{$filename}");
+  $upload_folder = "{$wp_upload_dir['basedir']}/{$project}/{$user_id}/{$type}";
+  $filename = "${user_id}_{$type}_{$today}.png";
+  $url = parse_url("{$wp_upload_dir['baseurl']}/{$project}/{$user_id}/{$type}/{$filename}");
   $filepath = $url["path"];
 
   if (!file_exists($upload_folder)) {

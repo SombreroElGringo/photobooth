@@ -100,57 +100,69 @@ const photobooth = (() => {
       let height = 390; // We will scale the photo height to this
 
       const camera = document.getElementById(`${id}_camera`);
+      const output = document.getElementById(`${id}_output`);
       const takeButton = document.getElementById(`${id}_take`);
       const retakeButton = document.getElementById(`${id}_retake`);
       const saveButton = document.getElementById(`${id}_save`);
 
       // Verify and connect to the camera of the device
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: false })
-        .then((stream) => {
-          camera.srcObject = stream;
-          camera.play();
-        })
-        .catch((error) => {
-          setInfo(id,
-            'An error occured. Please you need to allow your browser to acces your camera and refresh the page.'
-          );
-          takeButton.style.display = 'none';
-          console.error(`An error occurred: ${error}`);
-        });
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices
+          .getUserMedia({ video: { facingMode: "user" }, audio: false })
+          .then((stream) => {
+            camera.srcObject = stream;
+            camera.play();
+          })
+          .catch((error) => {
+            setInfo(id,
+              'An error occurred. You must allow your browser to access your camera and you need to refresh the page.'
+            );
+            takeButton.style.display = 'none';
+            console.error(`An error occurred: ${error}`);
+          });
 
-      camera.addEventListener(
-        'canplay',
-        (_event) => {
-          if (!streaming) {
-            camera.setAttribute('width', width);
-            camera.setAttribute('height', height);
-            streaming = true;
-          }
-        }, false);
+        camera.addEventListener(
+          'canplay',
+          (_event) => {
+            if (!streaming) {
+              camera.setAttribute('width', width);
+              camera.setAttribute('height', height);
+              streaming = true;
+            }
+          }, false);
 
-      takeButton.addEventListener(
-        'click',
-        (event) => {
-          takePhoto(id, width, height);
-          event.preventDefault();
-        }, false);
+        takeButton.addEventListener(
+          'click',
+          (event) => {
+            takePhoto(id, width, height);
+            event.preventDefault();
+          }, false);
 
-      retakeButton.addEventListener(
-        'click',
-         (event) => {
-          clearOutput(id);
-          event.preventDefault();
-        }, false);
+        retakeButton.addEventListener(
+          'click',
+          (event) => {
+            clearOutput(id);
+            event.preventDefault();
+          }, false);
 
-      saveButton.addEventListener(
-        'click',
-        (event) => {
-          savePhoto(id, overlayType);
-          event.preventDefault();
-        }, false);
-      // We make sure the output is clean at the initialization.
-      clearOutput(id);
+        saveButton.addEventListener(
+          'click',
+          (event) => {
+            savePhoto(id, overlayType);
+            event.preventDefault();
+          }, false);
+        // We make sure the output is clean at the initialization.
+        clearOutput(id);
+      } else {
+        output.style.display = 'none';
+        takeButton.style.display = 'none';
+        retakeButton.style.display = 'none';
+        saveButton.style.display = 'none';
+        setInfo(id,
+          'Oops! Your browser do not support the camera. Please try via your desktop or a browser supporting the camera.'
+        );
+      }
+
     }
   };
 })();

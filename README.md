@@ -49,4 +49,4 @@ Once the photo is taken, we will check if the table `{wp-prefix}photobooth` exis
 - `user_id` the id of the user
 - `type` is the parameter passed in the shortcode and will be use to categorize the image and which overlay we need to use
 - `filepath` is the file path of the image `/wp-content/uploads/photobooth/{user_id}/{type}/image.png`
-- `filename` is the file name with the following format: `{user_id}_{type}_{timestamp}.png`
+- `filename` is the file name with the following format: `{user_id}_{type}_{date}.png` the date follow ISO 8601 order "YYYY-MM-DD H:M:S"
