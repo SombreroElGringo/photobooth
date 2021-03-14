@@ -10,6 +10,8 @@ Photobooth is a wordpress plugin who allow the user to take picture of himself b
 - `Active` the plugin `photobooth`
 
 ### Upload the plugin
+- Download the `zip` of the last version at https://github.com/SombreroElGringo/photobooth/tags
+- Rename the zip as `photobooth.zip`
 - Open your `Admin dashboard` and go to `Plugins > Add New`
 - Click on the button `Upload Plugin` and select the file to upload `photobooth.zip`
 - Go to `Plugins > Installed Plugins`
