@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Photobooth
- * @version 1.0.0
+ * @version 1.0.1
  */
 /*
 Plugin Name: Photobooth
@@ -101,8 +101,8 @@ function upload_photo($type, $photo) {
 }
 
 function my_enqueue() {
-  wp_enqueue_style('style', plugins_url('photobooth/styles.css'));
-  wp_enqueue_script('ajax-script', plugins_url('photobooth/script.js'), array('jquery'));
+  wp_enqueue_style('style', plugin_dir_url(__FILE__).'styles.css');
+  wp_enqueue_script('ajax-script', plugin_dir_url(__FILE__).'script.js', array('jquery'));
   wp_localize_script('ajax-script', 'AjaxObject', array('url' => admin_url('admin-ajax.php')));
 }
 
