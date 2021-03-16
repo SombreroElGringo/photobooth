@@ -41,7 +41,7 @@ A `unique id` is generated for each shortcode.
 | Parameter | Description |
 |---|---|
 | type | Should be unique this `value` will be use to select the last photo uploaded in the database to be use as new overlay for this `type` |
-| default_overlay | Should be the `path` to a `image` to use as default `overlay`. The `size` of the `image` for the `overlay` must be `320 pixels width × 390 pixels height` |
+| default_overlay | Should be the `path` to a `image` to use as default `overlay`. The `size` of the `image` for the `overlay` must be `320 pixels 240 pixels height` |
 
 
 ## Where the image is uploaded?
