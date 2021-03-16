@@ -24,7 +24,7 @@
 }
 
 .photobooth__video {
-  height: 390px;
+  height: 240px;
   width: 320px;
   max-width: 320px;
   object-fit: fill;

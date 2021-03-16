@@ -97,7 +97,7 @@ const photobooth = (() => {
     initialize: (id, overlayType) => {
       let streaming = false; // |streaming| indicates whether or not we're currently streaming
       let width = 320; // We will scale the photo width to this
-      let height = 390; // We will scale the photo height to this
+      let height = 240; // We will scale the photo height to this
 
       const camera = document.getElementById(`${id}_camera`);
       const output = document.getElementById(`${id}_output`);
