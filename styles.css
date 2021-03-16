@@ -36,7 +36,7 @@
   max-width: 320px;
   object-fit: contain;
   position: absolute;
-  top: -5px;
+  top: -3px;
   right: 0;
   filter: opacity(40%);
 }

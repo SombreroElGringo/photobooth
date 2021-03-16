@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Photobooth
- * @version 1.0.3
+ * @version 1.0.5
  */
 /*
 Plugin Name: Photobooth
