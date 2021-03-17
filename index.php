@@ -1,6 +1,6 @@
 <?php
 /**
- * @package Photobooth_
+ * @package Photobooth
  * @version 1.0.6
  */
 /*
