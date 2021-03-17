@@ -1,14 +1,14 @@
 <?php
 /**
- * @package Photobooth
- * @version 1.0.5
+ * @package Photobooth_
+ * @version 1.0.6
  */
 /*
 Plugin Name: Photobooth
-Plugin URI: http://wordpress.org/plugins/hello-dolly/
+Plugin URI: https://github.com/SombreroElGringo/photobooth
 Description: this plugin allows to activate the shortcut [photobooth]. This shortcut will implement a component to be able to take a selfie by following some overlay rules; once taken, it will use the photo taken as a new overlay.
 Author: SombreroElGringo
-Version: 1.0.0
+Version: 1.0.6
 Author URI: https://github.com/SombreroElGringo/photobooth
 */
 
