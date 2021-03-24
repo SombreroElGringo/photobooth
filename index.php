@@ -55,6 +55,7 @@ function generate_html($uuid, $type, $overlay) {
       </div>
       <div id='{$uuid}_info' class='photobooth__info'></div>
       <div class='photobooth__buttons'>
+        <button id='{$uuid}_start' class='photobooth__button'>Start camera</button>
         <button id='{$uuid}_take' class='photobooth__button'>Take photo</button>
         <button id='{$uuid}_retake' class='photobooth__button'>Retake photo</button>
         <button id='{$uuid}_save' class='photobooth__button'>Save</button>
