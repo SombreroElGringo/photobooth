@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Photobooth
- * @version 1.1.1
+ * @version 1.1.2
  */
 /*
 Plugin Name: Photobooth
 Plugin URI: https://github.com/SombreroElGringo/photobooth
 Description: this plugin allows to activate the shortcut [photobooth]. This shortcut will implement a component to be able to take a selfie by following some overlay rules; once taken, it will use the photo taken as a new overlay.
 Author: SombreroElGringo
-Version: 1.1.1
+Version: 1.1.2
 Author URI: https://github.com/SombreroElGringo/photobooth
 */
 
@@ -35,6 +35,7 @@ function init($shortcode_atts) {
 }
 
 function generate_html($uuid, $type, $overlay) {
+  $user_id = get_current_user_id();
   return "
     <div id='{$uuid}' class='photobooth'>
       <div class='photobooth__camera'>
@@ -55,7 +56,6 @@ function generate_html($uuid, $type, $overlay) {
       </div>
       <div id='{$uuid}_info' class='photobooth__info'></div>
       <div class='photobooth__buttons'>
-        <button id='{$uuid}_start' class='photobooth__button'>Start camera</button>
         <button id='{$uuid}_take' class='photobooth__button'>Take photo</button>
         <button id='{$uuid}_retake' class='photobooth__button'>Retake photo</button>
         <button id='{$uuid}_save' class='photobooth__button'>Save</button>
@@ -63,7 +63,7 @@ function generate_html($uuid, $type, $overlay) {
     </div>
     <script src='https://webrtc.github.io/adapter/adapter-latest.js'></script>
     <script type='text/javascript'>
-      photobooth.initialize('{$uuid}', '{$type}');
+      photobooth.initialize('{$uuid}', '{$type}', '{$user_id}');
     </script>
   ";
 }
