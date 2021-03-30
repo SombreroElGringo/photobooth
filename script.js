@@ -8,6 +8,7 @@ const photobooth = (() => {
     const result = document.getElementById(`${id}_result`);
     const spinner = document.getElementById(`${id}_spinner`);
 
+
     if (result) {
       result.remove();
     }
@@ -53,6 +54,17 @@ const photobooth = (() => {
       document.body.appendChild(resultCanvas)
       const rcContext = resultCanvas.getContext('2d');
       rcContext.drawImage(camera, 0, 0, width, height);
+
+      const finalWidth = width * 4.5; // 1440
+      const finalHeight = height * 4.5; // 1080
+      const resultCanvas = document.createElement('canvas');
+      resultCanvas.style.display = 'none';
+      resultCanvas.width = finalWidth;
+      resultCanvas.height = finalHeight;
+      resultCanvas.id = `${id}_result`;
+      document.body.appendChild(resultCanvas)
+      const rcContext = resultCanvas.getContext('2d');
+      rcContext.drawImage(camera, 0, 0, width, height, 0, 0, finalWidth, finalHeight);
 
       output.setAttribute(
         'class',
@@ -147,8 +159,8 @@ const photobooth = (() => {
       let width = 1440//320; // We will scale the photo width to this
       let height = 1080//240; // We will scale the photo height to this
 
-      const config = { video: { width: width, height: height, facingMode: "user", aspectRatio: 4/3 }, audio: false }
-
+      const config = { video: { width: width, height: height, facingMode: "user", aspectRatio: 4/3 }, audio: false };
+      
       const camera = document.getElementById(`${id}_camera`);
       const output = document.getElementById(`${id}_output`);
       const takeButton = document.getElementById(`${id}_take`);
