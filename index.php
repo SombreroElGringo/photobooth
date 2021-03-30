@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Photobooth
- * @version 1.1.2
+ * @version 1.2.0
  */
 /*
 Plugin Name: Photobooth
 Plugin URI: https://github.com/SombreroElGringo/photobooth
 Description: this plugin allows to activate the shortcut [photobooth]. This shortcut will implement a component to be able to take a selfie by following some overlay rules; once taken, it will use the photo taken as a new overlay.
 Author: SombreroElGringo
-Version: 1.1.2
+Version: 1.2.0
 Author URI: https://github.com/SombreroElGringo/photobooth
 */
 
@@ -53,6 +53,9 @@ function generate_html($uuid, $type, $overlay) {
           alt='overlay'
         />
         <canvas id='{$uuid}_output' class='photobooth__output'></canvas>
+        <div id='{$uuid}_spinner' class='lds-ring'>
+          <div></div><div></div><div></div><div></div>
+        </div>
       </div>
       <div id='{$uuid}_info' class='photobooth__info'></div>
       <div class='photobooth__buttons'>

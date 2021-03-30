@@ -6,6 +6,7 @@ const photobooth = (() => {
     const saveButton = document.getElementById(`${id}_save`);
     const output = document.getElementById(`${id}_output`);
     const result = document.getElementById(`${id}_result`);
+    const spinner = document.getElementById(`${id}_spinner`);
 
     if (result) {
       result.remove();
@@ -22,6 +23,7 @@ const photobooth = (() => {
     takeButton.style.display = 'inline-block';
     retakeButton.style.display = 'none';
     saveButton.style.display = 'none';
+    spinner.style.display = 'none';
   }
 
   // Capture a photo by fetching the current contents of the video
@@ -76,7 +78,7 @@ const photobooth = (() => {
 
     result.remove();
     takeButton.style.display = 'none';
-    retakeButton.style.display = 'none';
+    retakeButton.style.display = 'inline-block';
     saveButton.style.display = 'none';
     setInfo(id, 'Your photo has been sucessfully saved!');
   }
@@ -90,9 +92,11 @@ const photobooth = (() => {
   }
 
   const savePhoto = (id, overlayType) => {
+    const spinner = document.getElementById(`${id}_spinner`);
     const output = document.getElementById(`${id}_result`);
     const photoURL = output.toDataURL('image/png');
     if (photoURL) {
+      spinner.style.display = 'inline-block';
       jQuery(document).ready(function(){
         jQuery.ajax({
           method: 'POST',
@@ -103,8 +107,10 @@ const photobooth = (() => {
             action: 'save_photobooth',
           }
         }).success(() => {
+          spinner.style.display = 'none';
           onSuccess(id);
         }).fail((error) => {
+          spinner.style.display = 'none';
           setInfo(id, 'An error occurred please try again later.');
           console.error(`An error occurred: ${error}`);
         });
@@ -119,12 +125,14 @@ const photobooth = (() => {
     const takeButton = document.getElementById(`${id}_take`);
     const retakeButton = document.getElementById(`${id}_retake`);
     const saveButton = document.getElementById(`${id}_save`);
+    const spinner = document.getElementById(`${id}_spinner`);
     camera.style.display = 'none';
     output.style.display = 'none';
     overlay.style.display = 'none';
     takeButton.style.display = 'none';
     retakeButton.style.display = 'none';
     saveButton.style.display = 'none';
+    spinner.style.display = 'none';
   }
 
   return {
@@ -139,7 +147,7 @@ const photobooth = (() => {
       let width = 1440//320; // We will scale the photo width to this
       let height = 1080//240; // We will scale the photo height to this
 
-      const config = { video: { width: width, height: height, facingMode: "user" }, audio: false }
+      const config = { video: { width: width, height: height, facingMode: "user", aspectRatio: 4/3 }, audio: false }
 
       const camera = document.getElementById(`${id}_camera`);
       const output = document.getElementById(`${id}_output`);
@@ -183,6 +191,7 @@ const photobooth = (() => {
         retakeButton.addEventListener(
           'click',
           (event) => {
+            setInfo(id, '');
             clearOutput(id);
             event.preventDefault();
           }, false);
