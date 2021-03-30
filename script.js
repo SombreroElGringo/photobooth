@@ -6,6 +6,8 @@ const photobooth = (() => {
     const saveButton = document.getElementById(`${id}_save`);
     const output = document.getElementById(`${id}_output`);
     const result = document.getElementById(`${id}_result`);
+    const spinner = document.getElementById(`${id}_spinner`);
+
 
     if (result) {
       result.remove();
@@ -22,6 +24,7 @@ const photobooth = (() => {
     takeButton.style.display = 'inline-block';
     retakeButton.style.display = 'none';
     saveButton.style.display = 'none';
+    spinner.style.display = 'none';
   }
 
   // Capture a photo by fetching the current contents of the video
@@ -37,9 +40,20 @@ const photobooth = (() => {
     const output = document.getElementById(`${id}_output`);
     if (width && height) {
       const context = output.getContext('2d');
-      output.width = width;
-      output.height = height;
-      context.drawImage(camera, 0, 0, width, height);
+      output.width = width / 4.5; // 320
+      output.height = height / 4.5; // 240
+      context.drawImage(camera, 0, 0, width / 4.5, height / 4.5);
+
+      const finalWidth = width; // 1440
+      const finalHeight = height; // 1080
+      const resultCanvas = document.createElement('canvas');
+      resultCanvas.style.display = 'none';
+      resultCanvas.width = finalWidth;
+      resultCanvas.height = finalHeight;
+      resultCanvas.id = `${id}_result`;
+      document.body.appendChild(resultCanvas)
+      const rcContext = resultCanvas.getContext('2d');
+      rcContext.drawImage(camera, 0, 0, width, height);
 
       const finalWidth = width * 4.5; // 1440
       const finalHeight = height * 4.5; // 1080
@@ -76,7 +90,7 @@ const photobooth = (() => {
 
     result.remove();
     takeButton.style.display = 'none';
-    retakeButton.style.display = 'none';
+    retakeButton.style.display = 'inline-block';
     saveButton.style.display = 'none';
     setInfo(id, 'Your photo has been sucessfully saved!');
   }
@@ -90,9 +104,11 @@ const photobooth = (() => {
   }
 
   const savePhoto = (id, overlayType) => {
+    const spinner = document.getElementById(`${id}_spinner`);
     const output = document.getElementById(`${id}_result`);
     const photoURL = output.toDataURL('image/png');
     if (photoURL) {
+      spinner.style.display = 'inline-block';
       jQuery(document).ready(function(){
         jQuery.ajax({
           method: 'POST',
@@ -103,8 +119,10 @@ const photobooth = (() => {
             action: 'save_photobooth',
           }
         }).success(() => {
+          spinner.style.display = 'none';
           onSuccess(id);
         }).fail((error) => {
+          spinner.style.display = 'none';
           setInfo(id, 'An error occurred please try again later.');
           console.error(`An error occurred: ${error}`);
         });
@@ -112,14 +130,37 @@ const photobooth = (() => {
     }
   }
 
+  const disableButtons = (id) => {
+    const camera = document.getElementById(`${id}_camera`);
+    const output = document.getElementById(`${id}_output`);
+    const overlay = document.getElementById(`${id}_overlay`);
+    const takeButton = document.getElementById(`${id}_take`);
+    const retakeButton = document.getElementById(`${id}_retake`);
+    const saveButton = document.getElementById(`${id}_save`);
+    const spinner = document.getElementById(`${id}_spinner`);
+    camera.style.display = 'none';
+    output.style.display = 'none';
+    overlay.style.display = 'none';
+    takeButton.style.display = 'none';
+    retakeButton.style.display = 'none';
+    saveButton.style.display = 'none';
+    spinner.style.display = 'none';
+  }
+
   return {
-    initialize: (id, overlayType) => {
+    initialize: (id, overlayType, userId) => {
+      if (userId === '0') {
+        setInfo(id,
+          'You need to be logged in to use this feature.'
+        );
+        return disableButtons(id);
+      }
       let streaming = false; // |streaming| indicates whether or not we're currently streaming
-      let width = 320; // We will scale the photo width to this
-      let height = 240; // We will scale the photo height to this
+      let width = 1440//320; // We will scale the photo width to this
+      let height = 1080//240; // We will scale the photo height to this
 
-      const config = { video: { width: width, height: height, facingMode: "user" }, audio: false }
-
+      const config = { video: { width: width, height: height, facingMode: "user", aspectRatio: 4/3 }, audio: false };
+      
       const camera = document.getElementById(`${id}_camera`);
       const output = document.getElementById(`${id}_output`);
       const takeButton = document.getElementById(`${id}_take`);
@@ -162,6 +203,7 @@ const photobooth = (() => {
         retakeButton.addEventListener(
           'click',
           (event) => {
+            setInfo(id, '');
             clearOutput(id);
             event.preventDefault();
           }, false);
@@ -183,7 +225,6 @@ const photobooth = (() => {
           'Oops! Your browser do not support the camera. Please try via your desktop or a browser supporting the camera.'
         );
       }
-
     }
   };
 })();
