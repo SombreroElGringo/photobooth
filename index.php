@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Photobooth
- * @version 1.2.0
+ * @version 2.0.0
  */
 /*
 Plugin Name: Photobooth
 Plugin URI: https://github.com/SombreroElGringo/photobooth
 Description: this plugin allows to activate the shortcut [photobooth]. This shortcut will implement a component to be able to take a selfie by following some overlay rules; once taken, it will use the photo taken as a new overlay.
 Author: SombreroElGringo
-Version: 1.2.0
+Version: 2.0.0
 Author URI: https://github.com/SombreroElGringo/photobooth
 */
 
@@ -16,26 +16,41 @@ Author URI: https://github.com/SombreroElGringo/photobooth
 define('PLUGIN_DIR', plugin_dir_path(__FILE__));
 require_once(PLUGIN_DIR . 'database.php');
 
-$SHORTCODE = 'photobooth';
-
-function init($shortcode_atts) {
-  initialiaze_db();
-
+function init($shortcode_atts) { // add attr overlays=['url1', ...] and types=['type1',...]
+  init_db();
   $atts = shortcode_atts(array(
-    'type' => 'default',
-    'default_overlay' => ''
+    'types' => array('default'),
+    'overlays' => array(),
    ), $shortcode_atts);
 
-  $uuid = uniqid();
-  $user_overlay = get_overlay($atts['type']);
-  $overlay = is_null($user_overlay) ?
-    $atts['default_overlay'] : $user_overlay;
+  $no_whitespaces_types = preg_replace( '/\s*,\s*/', ',', filter_var($atts['types'], FILTER_SANITIZE_STRING ));
+  $no_whitespaces_overlays = preg_replace( '/\s*,\s*/', ',', filter_var($atts['overlays'], FILTER_SANITIZE_STRING ));
+  $types = explode(',', $no_whitespaces_types);
+  $overlays= explode(',', $no_whitespaces_overlays);
 
-  return generate_html($uuid, $atts['type'], $overlay);
+  return generate_html($types, $overlays);
 }
 
-function generate_html($uuid, $type, $overlay) {
+function get_default_overlay($type, $overlay) {
+  $user_overlay = get_overlay($type);
+  $result = is_null($user_overlay) ?
+    $overlay : $user_overlay;
+  return $result;
+}
+
+function get_select_options($types) {
+  $options = "";
+  foreach($types as $key => $value ) {
+   $options .= "<option value={$value}>{$value}</option>";
+  }
+  return $options;
+}
+
+function generate_html($types, $overlays) {
+  $uuid = uniqid();
   $user_id = get_current_user_id();
+  $overlay = get_default_overlay($types[0], $overlays[0]);
+
   return "
     <div id='{$uuid}' class='photobooth'>
       <div class='photobooth__camera'>
@@ -58,6 +73,9 @@ function generate_html($uuid, $type, $overlay) {
         </div>
       </div>
       <div id='{$uuid}_info' class='photobooth__info'></div>
+      <div>
+        <select id='{$uuid}_select' class='photobooth__select'>".get_select_options($types)."</select>
+      </div>
       <div class='photobooth__buttons'>
         <button id='{$uuid}_take' class='photobooth__button'>Take photo</button>
         <button id='{$uuid}_retake' class='photobooth__button'>Retake photo</button>
@@ -66,12 +84,12 @@ function generate_html($uuid, $type, $overlay) {
     </div>
     <script src='https://webrtc.github.io/adapter/adapter-latest.js'></script>
     <script type='text/javascript'>
-      photobooth.initialize('{$uuid}', '{$type}', '{$user_id}');
+      photobooth.initialize('{$uuid}', '{$user_id}', ".json_encode($overlays).");
     </script>
   ";
 }
 
-function save_photobooth() {
+function save_photo() {
   $type = $_POST["type"];
   $photo = $_POST["photo"];
   if (!is_null($photo) && !is_null($type)) {
@@ -81,16 +99,18 @@ function save_photobooth() {
   wp_die();
 }
 
+function generate_path($dir, $user_id, $type) {
+  return "{$dir}/photobooth/{$user_id}/{$type}";
+}
+
 function upload_photo($type, $photo) {
-  $wp_upload_dir = wp_upload_dir();
+  $upload_dir = wp_upload_dir();
   $user_id = get_current_user_id();
   $today = date('Y-m-d_H:i:s');
-  $project = 'photobooth';
 
-  $upload_folder = "{$wp_upload_dir['basedir']}/{$project}/{$user_id}/{$type}";
   $filename = "${user_id}_{$type}_{$today}.png";
-  $url = parse_url("{$wp_upload_dir['baseurl']}/{$project}/{$user_id}/{$type}/{$filename}");
-  $filepath = $url["path"];
+  $url = parse_url(generate_path($upload_dir['baseurl'], $user_id, $type) . "/{$filename}");
+  $upload_folder = generate_path($upload_dir['basedir'], $user_id, $type);
 
   if (!file_exists($upload_folder)) {
     mkdir($upload_folder, 0755, true);
@@ -101,7 +121,15 @@ function upload_photo($type, $photo) {
   $photo = base64_decode($photo);
 
   file_put_contents("{$upload_folder}/{$filename}", $photo);
-  insert_photobooth($type, $filepath, $filename);
+  insert_db($type, $url['path'], $filename);
+}
+
+function get_photo() {
+  $type = $_GET["type"];
+  if (!is_null($type)) {
+    echo get_overlay($type);
+  }
+  wp_die();
 }
 
 function my_enqueue() {
@@ -110,9 +138,14 @@ function my_enqueue() {
   wp_localize_script('ajax-script', 'AjaxObject', array('url' => admin_url('admin-ajax.php')));
 }
 
-add_shortcode($SHORTCODE, 'init');
+add_shortcode('photobooth', 'init');
+// Load scripts
 add_action( 'wp_enqueue_scripts', 'my_enqueue' );
-add_action('wp_ajax_save_photobooth', 'save_photobooth');
-add_action('wp_ajax_nopriv_save_photobooth', 'save_photobooth');
+// Ajax
+add_action('wp_ajax_save_photo', 'save_photo');
+add_action('wp_ajax_nopriv_save_photo', 'save_photo');
+
+add_action('wp_ajax_get_photo', 'get_photo');
+add_action('wp_ajax_nopriv_get_photo', 'get_photo');
 
 ?>

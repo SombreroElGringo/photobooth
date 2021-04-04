@@ -22,26 +22,33 @@ Photobooth is a wordpress plugin who allow the user to take picture of himself b
 You just need to create a new `page` and use the following `shortcode`:
 
 ```
-[photobooth type="top" default_overlay="overlay_top.png"]
+[photobooth
+  types="top, hairline, left, right"
+  overlays="top.png, hairline.png, left.png, right.png"
+]
 ```
 
 If needed you can use `multiple times` the `shortcode` on your page.
 A `unique id` is generated for each shortcode.
 
 ```
-[photobooth type="top" default_overlay="overlay_top.png"]
+[photobooth
+  types="top, hairline"
+  overlays="top.png, hairline.png"
+]
 
-[photobooth type="front" default_overlay="overlay_front.png"]
-
-[photobooth type="side" default_overlay="overlay_side.png"]
+[photobooth
+  types="left, right"
+  overlays="left.png, right.png"
+]
 ```
 
 ## Shortcode requierements
 
 | Parameter | Description |
 |---|---|
-| type | Should be unique this `value` will be use to select the last photo uploaded in the database to be use as new overlay for this `type` |
-| default_overlay | Should be the `path` to a `image` to use as default `overlay`. The `size` of the `image` for the `overlay` must be `320 pixels 240 pixels height` |
+| types | Should be a array of unique `value`. They will be use to select the last photo uploaded in the database for this `types` |
+| overlays | Should be a array of `paths` to some `images` to use as default `overlay`. The `size` of the `image` for the `overlay` must be `320 pixels 240 pixels height` |
 
 
 ## Where the image is uploaded?

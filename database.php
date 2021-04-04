@@ -1,11 +1,10 @@
 <?php
 
 # Create the table in the database if it does not exist
-function initialiaze_db() {
+function init_db() {
   global $wpdb;
   require_once ABSPATH . 'wp-admin/includes/upgrade.php';
   $TABLENAME = "{$wpdb->prefix}photobooth";
-
   $SQL_CREATE = "CREATE TABLE {$TABLENAME} (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -14,14 +13,12 @@ function initialiaze_db() {
     filename VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )";
-
   maybe_create_table($TABLENAME, $SQL_CREATE);
-
   $wpdb->flush();
 }
 
 # Insert the row in the database
-function insert_photobooth($type, $filepath, $filename) {
+function insert_db($type, $filepath, $filename) {
   global $wpdb;
   $TABLENAME = "{$wpdb->prefix}photobooth";
   $wpdb->insert($TABLENAME, array(
@@ -34,13 +31,12 @@ function insert_photobooth($type, $filepath, $filename) {
   $wpdb->flush();
 }
 
-# Select the last overlay uploaded by the user
+# Select the last overlay uploaded by the current user
 function get_overlay($type) {
   global $wpdb;
   $TABLENAME = "{$wpdb->prefix}photobooth";
   $USER_ID = get_current_user_id();
-
-  $photobooth = $wpdb->get_row(
+  $row = $wpdb->get_row(
     $wpdb->prepare("
       SELECT filepath
       FROM $TABLENAME
@@ -51,7 +47,6 @@ function get_overlay($type) {
     ")
   );
   $wpdb->flush();
-  return $photobooth->filepath;
+  return $row->filepath;
 }
-
 ?>

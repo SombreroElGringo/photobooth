@@ -45,6 +45,16 @@
   width: 320px;
 }
 
+.photobooth__select {
+  width: 100%;
+  padding: 0 6px;
+  margin-bottom: 8px;
+}
+
+.photobooth__select:focus {
+  outline-width: 0;
+}
+
 .photobooth__buttons {
   width: 100%;
 }

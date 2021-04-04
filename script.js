@@ -1,13 +1,127 @@
 const photobooth = (() => {
-  // Fill the photo with an indication that none has been captured.
-  const clearOutput = (id) => {
-    const takeButton = document.getElementById(`${id}_take`);
-    const retakeButton = document.getElementById(`${id}_retake`);
-    const saveButton = document.getElementById(`${id}_save`);
-    const output = document.getElementById(`${id}_output`);
-    const result = document.getElementById(`${id}_result`);
-    const spinner = document.getElementById(`${id}_spinner`);
+  const WIDTH = 1440;
+  const HEIGHT = 1080;
+  /**
+   * Actions
+   */
+   const takePhoto = (id) => {
+    const camera = getElementById(`${id}_camera`);
+    const output = getElementById(`${id}_output`);
 
+    if (WIDTH && HEIGHT) {
+      const context = output.getContext('2d');
+      output.width = WIDTH / 4.5; // 320
+      output.height = HEIGHT / 4.5; // 240
+      context.drawImage(camera, 0, 0, WIDTH / 4.5, HEIGHT / 4.5);
+
+      const resultCanvas = document.createElement('canvas');
+      resultCanvas.style.display = 'none';
+      resultCanvas.width = WIDTH;
+      resultCanvas.height = HEIGHT;
+      resultCanvas.id = `${id}_result`;
+      document.body.appendChild(resultCanvas)
+      const rcContext = resultCanvas.getContext('2d');
+      rcContext.drawImage(camera, 0, 0, WIDTH, HEIGHT);
+
+      output.setAttribute(
+        'class',
+        'photobooth__output photobooth__output--display'
+      );
+
+      displayElementsAs(id, ['take'], 'none');
+      displayElementsAs(id, ['retake', 'save'], 'inline-block');
+    } else {
+      clearCanvas();
+    }
+  }
+
+  const savePhoto = (id) => {
+    const output = getElementById(`${id}_result`);
+    const select = getElementById(`${id}_select`);
+    const photoURL = output.toDataURL('image/png');
+
+    if (photoURL) {
+      displayElementsAs(id, ['spinner'], 'inline-block');
+      jQuery(document).ready(() => {
+        jQuery.ajax({
+          method: 'POST',
+          url: AjaxObject.url,
+          data: {
+            photo: photoURL,
+            type: select.value,
+            action: 'save_photo',
+          }
+        }).success(() => {
+          displayElementsAs(id, ['spinner'], 'none');
+          onSuccess(id);
+        }).fail((error) => {
+          displayElementsAs(id, ['spinner'], 'none');
+          setInfo(id, 'An error occurred please try again later.');
+          console.error(`An error occurred: ${error}`);
+        });
+      });
+    }
+  }
+
+  const onSuccess = (id) => {
+    const output = getElementById(`${id}_output`);
+    const result = getElementById(`${id}_result`);
+
+    let context = output.getContext('2d');
+    context.fillStyle = '#AAA';
+    result.remove();
+
+    displayElementsAs(id, ['save'], 'none');
+    setInfo(id, 'Your photo has been sucessfully saved!');
+  }
+
+  const getOverlay = (id, overlays, type) => {
+    displayElementsAs(id, ['spinner'], 'inline-block');
+    jQuery(document).ready(() => {
+      jQuery.ajax({
+        method: 'GET',
+        url: AjaxObject.url,
+        data: {
+          type: type,
+          action: 'get_photo',
+        }
+      }).success((data) => {
+        const select = getElementById(`${id}_select`);
+        const overlay = getElementById(`${id}_overlay`);
+        clearCanvas(id);
+        overlay.src = !!data ? data : overlays[select.selectedIndex];
+        displayElementsAs(id, ['retake', 'save', 'spinner'], 'none');
+        displayElementsAs(id, ['take'], 'inline-block');
+      }).fail((error) => {
+        displayElementsAs(id, ['spinner'], 'none');
+        console.error(`An error occurred: ${error}`);
+      });
+    });
+  }
+
+  /**
+   * Utils
+   */
+  const getElementById = (elementId) => document.getElementById(elementId);
+
+  const setInfo = (id, message) => {
+    const infoElement = getElementById(`${id}_info`);
+    const span = document.createElement('span');
+    span.innerText = message;
+    infoElement.innerText ='';
+    infoElement.appendChild(span);
+  }
+
+  const displayElementsAs = (id, elements, value) => {
+    elements.forEach((element) => {
+      const item = getElementById(`${id}_${element}`);
+      item.style.display = value;
+    })
+  }
+
+  const clearCanvas = (id) => {
+    const output = getElementById(`${id}_output`);
+    const result = getElementById(`${id}_result`);
 
     if (result) {
       result.remove();
@@ -20,210 +134,77 @@ const photobooth = (() => {
       'class',
       'photobooth__output photobooth__output--hidden'
     );
-
-    takeButton.style.display = 'inline-block';
-    retakeButton.style.display = 'none';
-    saveButton.style.display = 'none';
-    spinner.style.display = 'none';
   }
 
-  // Capture a photo by fetching the current contents of the video
-  // and drawing it into a canvas, then converting that to a PNG
-  // format data URL. By drawing it on an offscreen canvas and then
-  // drawing that to the screen, we can change its size and/or apply
-  // other changes before drawing it.
-  const takePhoto = (id, width, height) => {
-    const saveButton = document.getElementById(`${id}_save`);
-    const takeButton = document.getElementById(`${id}_take`);
-    const retakeButton = document.getElementById(`${id}_retake`);
-    const camera = document.getElementById(`${id}_camera`);
-    const output = document.getElementById(`${id}_output`);
-    if (width && height) {
-      const context = output.getContext('2d');
-      output.width = width / 4.5; // 320
-      output.height = height / 4.5; // 240
-      context.drawImage(camera, 0, 0, width / 4.5, height / 4.5);
+  const initCamera = (id) => {
+    let streaming = false; // |streaming| indicates whether or not we're currently streaming
+    const config = { video: { width: WIDTH, height: HEIGHT, facingMode: "user" }, audio: false }
+    const camera = getElementById(`${id}_camera`);
 
-      const finalWidth = width; // 1440
-      const finalHeight = height; // 1080
-      const resultCanvas = document.createElement('canvas');
-      resultCanvas.style.display = 'none';
-      resultCanvas.width = finalWidth;
-      resultCanvas.height = finalHeight;
-      resultCanvas.id = `${id}_result`;
-      document.body.appendChild(resultCanvas)
-      const rcContext = resultCanvas.getContext('2d');
-      rcContext.drawImage(camera, 0, 0, width, height);
+    navigator.mediaDevices.getUserMedia(config).then((stream) => {
+        camera.srcObject = stream;
+        camera.pause();
+        camera.play();
+    }).catch((error) => {
+      setInfo(id, 'An error occurred. You must allow your browser to access your camera and you need to refresh the page.');
+      displayElementsAs(id, ['select', 'take', 'retake', 'save', 'output', 'spinner'], 'none');
+      console.error(`An error occurred: ${error}`);
+    });
 
-      const finalWidth = width * 4.5; // 1440
-      const finalHeight = height * 4.5; // 1080
-      const resultCanvas = document.createElement('canvas');
-      resultCanvas.style.display = 'none';
-      resultCanvas.width = finalWidth;
-      resultCanvas.height = finalHeight;
-      resultCanvas.id = `${id}_result`;
-      document.body.appendChild(resultCanvas)
-      const rcContext = resultCanvas.getContext('2d');
-      rcContext.drawImage(camera, 0, 0, width, height, 0, 0, finalWidth, finalHeight);
-
-      output.setAttribute(
-        'class',
-        'photobooth__output photobooth__output--display'
-      );
-      takeButton.style.display = 'none';
-      retakeButton.style.display = 'inline-block';
-      saveButton.style.display = 'inline-block';
-    } else {
-      clearOutput();
-    }
+    camera.addEventListener('canplay', (_event) => {
+      if (!streaming) {
+        camera.setAttribute('width', WIDTH);
+        camera.setAttribute('height', HEIGHT);
+        streaming = true;
+      }
+    }, false);
   }
 
-  const onSuccess = (id) => {
-    const takeButton = document.getElementById(`${id}_take`);
-    const retakeButton = document.getElementById(`${id}_retake`);
-    const saveButton = document.getElementById(`${id}_save`);
-    const output = document.getElementById(`${id}_output`);
-    const result = document.getElementById(`${id}_result`);
+  const initEventListeners = (id, overlays) => {
+    const takeButton = getElementById(`${id}_take`);
+    const retakeButton = getElementById(`${id}_retake`);
+    const saveButton = getElementById(`${id}_save`);
+    const select = getElementById(`${id}_select`);
 
-    let context = output.getContext('2d');
-    context.fillStyle = '#AAA';
+    takeButton.addEventListener('click', (event) => {
+      takePhoto(id);
+      event.preventDefault();
+    }, false);
 
-    result.remove();
-    takeButton.style.display = 'none';
-    retakeButton.style.display = 'inline-block';
-    saveButton.style.display = 'none';
-    setInfo(id, 'Your photo has been sucessfully saved!');
-  }
+    retakeButton.addEventListener('click', (event) => {
+      setInfo(id, '');
+      clearCanvas(id);
+      displayElementsAs(id, ['retake', 'save', 'spinner'], 'none');
+      displayElementsAs(id, ['take'], 'inline-block');
+      event.preventDefault();
+    }, false);
 
-  const setInfo = (id, message) => {
-    const infoDiv = document.getElementById(`${id}_info`);
-    const span = document.createElement('span');
-    span.innerText = message;
-    infoDiv.innerText ='';
-    infoDiv.appendChild(span);
-  }
+    saveButton.addEventListener('click', (event) => {
+      savePhoto(id);
+      event.preventDefault();
+    }, false);
 
-  const savePhoto = (id, overlayType) => {
-    const spinner = document.getElementById(`${id}_spinner`);
-    const output = document.getElementById(`${id}_result`);
-    const photoURL = output.toDataURL('image/png');
-    if (photoURL) {
-      spinner.style.display = 'inline-block';
-      jQuery(document).ready(function(){
-        jQuery.ajax({
-          method: 'POST',
-          url: AjaxObject.url,
-          data: {
-            photo: photoURL,
-            type: overlayType,
-            action: 'save_photobooth',
-          }
-        }).success(() => {
-          spinner.style.display = 'none';
-          onSuccess(id);
-        }).fail((error) => {
-          spinner.style.display = 'none';
-          setInfo(id, 'An error occurred please try again later.');
-          console.error(`An error occurred: ${error}`);
-        });
-      });
-    }
-  }
-
-  const disableButtons = (id) => {
-    const camera = document.getElementById(`${id}_camera`);
-    const output = document.getElementById(`${id}_output`);
-    const overlay = document.getElementById(`${id}_overlay`);
-    const takeButton = document.getElementById(`${id}_take`);
-    const retakeButton = document.getElementById(`${id}_retake`);
-    const saveButton = document.getElementById(`${id}_save`);
-    const spinner = document.getElementById(`${id}_spinner`);
-    camera.style.display = 'none';
-    output.style.display = 'none';
-    overlay.style.display = 'none';
-    takeButton.style.display = 'none';
-    retakeButton.style.display = 'none';
-    saveButton.style.display = 'none';
-    spinner.style.display = 'none';
+    select.addEventListener('change', (event) => {
+      getOverlay(id, overlays, event.currentTarget.value);
+      event.preventDefault();
+    }, false);
   }
 
   return {
-    initialize: (id, overlayType, userId) => {
+    initialize: (id, userId, overlays) => {
       if (userId === '0') {
-        setInfo(id,
-          'You need to be logged in to use this feature.'
-        );
-        return disableButtons(id);
+        setInfo(id, 'You need to be logged in to use this feature.');
+        return displayElementsAs(id, ['select', 'take', 'retake', 'save', 'camera', 'output', 'overlay', 'spinner'], 'none');
       }
-      let streaming = false; // |streaming| indicates whether or not we're currently streaming
-      let width = 1440//320; // We will scale the photo width to this
-      let height = 1080//240; // We will scale the photo height to this
 
-      const config = { video: { width: width, height: height, facingMode: "user", aspectRatio: 4/3 }, audio: false };
-      
-      const camera = document.getElementById(`${id}_camera`);
-      const output = document.getElementById(`${id}_output`);
-      const takeButton = document.getElementById(`${id}_take`);
-      const retakeButton = document.getElementById(`${id}_retake`);
-      const saveButton = document.getElementById(`${id}_save`);
-
-      // Verify and connect to the camera of the device
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices
-          .getUserMedia(config)
-          .then((stream) => {
-            camera.srcObject = stream;
-            camera.play();
-          })
-          .catch((error) => {
-            setInfo(id,
-              'An error occurred. You must allow your browser to access your camera and you need to refresh the page.'
-            );
-            takeButton.style.display = 'none';
-            console.error(`An error occurred: ${error}`);
-          });
-
-        camera.addEventListener(
-          'canplay',
-          (_event) => {
-            if (!streaming) {
-              camera.setAttribute('width', width);
-              camera.setAttribute('height', height);
-              streaming = true;
-            }
-          }, false);
-
-        takeButton.addEventListener(
-          'click',
-          (event) => {
-            takePhoto(id, width, height);
-            event.preventDefault();
-          }, false);
-
-        retakeButton.addEventListener(
-          'click',
-          (event) => {
-            setInfo(id, '');
-            clearOutput(id);
-            event.preventDefault();
-          }, false);
-
-        saveButton.addEventListener(
-          'click',
-          (event) => {
-            savePhoto(id, overlayType);
-            event.preventDefault();
-          }, false);
-        // We make sure the output is clean at the initialization.
-        clearOutput(id);
+        initCamera(id);
+        initEventListeners(id, overlays);
+        displayElementsAs(id, ['retake', 'save', 'spinner'], 'none');
+        clearCanvas(id);
       } else {
-        output.style.display = 'none';
-        takeButton.style.display = 'none';
-        retakeButton.style.display = 'none';
-        saveButton.style.display = 'none';
-        setInfo(id,
-          'Oops! Your browser do not support the camera. Please try via your desktop or a browser supporting the camera.'
-        );
+        displayElementsAs(id, ['select', 'take', 'retake', 'save', 'camera', 'output', 'overlay', 'spinner'], 'none');
+        setInfo(id, 'Oops! Your browser do not support the camera. Please try via your desktop or a browser supporting the camera.');
       }
     }
   };
