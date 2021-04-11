@@ -1,6 +1,6 @@
 const photobooth = (() => {
-  const WIDTH = 1440;
-  const HEIGHT = 1080;
+  const WIDTH = 960;
+  const HEIGHT = 720;
   /**
    * Actions
    */
@@ -10,9 +10,9 @@ const photobooth = (() => {
 
     if (WIDTH && HEIGHT) {
       const context = output.getContext('2d');
-      output.width = WIDTH / 4.5; // 320
-      output.height = HEIGHT / 4.5; // 240
-      context.drawImage(camera, 0, 0, WIDTH / 4.5, HEIGHT / 4.5);
+      output.width = WIDTH / 3;// 320
+      output.height = HEIGHT / 3;// 240
+      context.drawImage(camera, 0, 0, WIDTH / 3, HEIGHT / 3);
 
       const resultCanvas = document.createElement('canvas');
       resultCanvas.style.display = 'none';
