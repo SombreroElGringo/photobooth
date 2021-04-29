@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Photobooth
- * @version 2.0.0
+ * @version 2.2.0
  */
 /*
 Plugin Name: Photobooth
 Plugin URI: https://github.com/SombreroElGringo/photobooth
 Description: this plugin allows to activate the shortcut [photobooth]. This shortcut will implement a component to be able to take a selfie by following some overlay rules; once taken, it will use the photo taken as a new overlay.
 Author: SombreroElGringo
-Version: 2.0.0
+Version: 2.2.0
 Author URI: https://github.com/SombreroElGringo/photobooth
 */
 
@@ -16,7 +16,7 @@ Author URI: https://github.com/SombreroElGringo/photobooth
 define('PLUGIN_DIR', plugin_dir_path(__FILE__));
 require_once(PLUGIN_DIR . 'database.php');
 
-function init($shortcode_atts) { // add attr overlays=['url1', ...] and types=['type1',...]
+function init($shortcode_atts) {
   init_db();
   $atts = shortcode_atts(array(
     'types' => array('default'),
@@ -78,6 +78,7 @@ function generate_html($types, $overlays) {
       </div>
       <div class='photobooth__buttons'>
         <button id='{$uuid}_take' class='photobooth__button'>Take photo</button>
+        <button id='{$uuid}_mobile_camera' class='photobooth__button' data-current-camera='user'>Back camera</button>
         <button id='{$uuid}_retake' class='photobooth__button'>Retake photo</button>
         <button id='{$uuid}_save' class='photobooth__button'>Save</button>
       </div>

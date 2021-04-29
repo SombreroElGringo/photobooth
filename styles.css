@@ -13,6 +13,7 @@
   background-color: #808080;
   position: absolute;
   top: 0;
+  width: 100%;
 }
 
 .photobooth__output--hidden {
@@ -24,7 +25,7 @@
 }
 
 .photobooth__video {
-  height: 240px;
+  height: 320px;
   width: 320px;
   max-width: 320px;
   object-fit: fill;
