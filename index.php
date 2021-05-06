@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Photobooth
- * @version 2.2.0
+ * @version 2.2.2
  */
 /*
 Plugin Name: Photobooth
 Plugin URI: https://github.com/SombreroElGringo/photobooth
 Description: this plugin allows to activate the shortcut [photobooth]. This shortcut will implement a component to be able to take a selfie by following some overlay rules; once taken, it will use the photo taken as a new overlay.
 Author: SombreroElGringo
-Version: 2.2.0
+Version: 2.2.2
 Author URI: https://github.com/SombreroElGringo/photobooth
 */
 

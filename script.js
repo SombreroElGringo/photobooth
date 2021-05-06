@@ -234,6 +234,7 @@ const photobooth = (() => {
     }, false);
 
     select.addEventListener('change', (event) => {
+      setInfo(id, '');
       getOverlay(id, overlays, event.currentTarget.value);
       event.preventDefault();
     }, false);
