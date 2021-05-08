@@ -236,6 +236,9 @@ const photobooth = (() => {
     select.addEventListener('change', (event) => {
       setInfo(id, '');
       getOverlay(id, overlays, event.currentTarget.value);
+      if (isMobileOrTabletCheck()) {
+        displayElementsAs(id, ['mobile_camera'], 'inline-block');
+      }
       event.preventDefault();
     }, false);
 
